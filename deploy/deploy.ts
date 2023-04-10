@@ -27,7 +27,7 @@ const guardianAddresses = [
   '0xc98fddaa24b8d1fb21d01c40134e40ab9dc963dc',
   '0x9f03D5226B48267123b8E4d264e619Fe2B243CE0',
 ];
-const randomId = 8025;
+const randomId = 8029;
 
 // An example of a deploy script that will deploy and call a simple contract.
 export default async function(hre: HardhatRuntimeEnvironment) {
@@ -90,12 +90,12 @@ export default async function(hre: HardhatRuntimeEnvironment) {
         contractSymbol,
         TOKEN_ID,
         contractTerms,
-        contractTermsHash,
-        isSecurityDLT,
-        globalListAddress,
-        dauraWalletAddress,
-        useRuleEngine,
-        guardianAddresses,
+        // contractTermsHash,
+        // isSecurityDLT,
+        // globalListAddress,
+        // dauraWalletAddress,
+        // useRuleEngine,
+        // guardianAddresses,
         randomId,
       );
       await txReceipt.wait(1);

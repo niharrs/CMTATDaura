@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.17;
 
-import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract GlobalList is Initializable, OwnableUpgradeable {
     mapping(address => bool) private whitelist;
@@ -18,21 +18,19 @@ contract GlobalList is Initializable, OwnableUpgradeable {
 
     function initialize(
         address[] memory whitelist_,
-        address[] memory blacklist_,
-        address listOwner
+        address[] memory blacklist_
     ) public initializer {
         __Ownable_init();
         _addToWhitelist(whitelist_);
         _setBlacklist(blacklist_, true);
         //to enable burning and minting, zero address has to be whitelisted
         whitelist[address(0)] = true;
-        _transferOwnership(listOwner);
     }
 
     function addToPaymasterWhitelist(address add) external onlyOwner {
         require(
             paymasterWhitelist[add] == false,
-            'GlobalList: Address already whitelisted in paymaster whitelist'
+            "GlobalList: Address already whitelisted in paymaster whitelist"
         );
         paymasterWhitelist[add] = true;
         emit AddToPaymasterWhitelist(add);
@@ -47,7 +45,7 @@ contract GlobalList is Initializable, OwnableUpgradeable {
     function removeFromPaymasterWhitelist(address add) external onlyOwner {
         require(
             paymasterWhitelist[add] == true,
-            'GlobalList: Address not whitelisted in paymaster whitelist'
+            "GlobalList: Address not whitelisted in paymaster whitelist"
         );
         paymasterWhitelist[add] = false;
         emit RemoveFromPaymasterWhitelist(add);
@@ -62,7 +60,7 @@ contract GlobalList is Initializable, OwnableUpgradeable {
     function addToWhitelist(address wallet_) external onlyOwner {
         require(
             whitelist[wallet_] == false,
-            'GlobalList: Address already whitelisted'
+            "GlobalList: Address already whitelisted"
         );
         whitelist[wallet_] = true;
         emit AddToWhitelist(wallet_);
@@ -75,7 +73,7 @@ contract GlobalList is Initializable, OwnableUpgradeable {
     function addToBlacklist(address wallet_) external onlyOwner {
         require(
             blacklist[wallet_] == false,
-            'GlobalList: Address already blacklisted'
+            "GlobalList: Address already blacklisted"
         );
         blacklist[wallet_] = true;
         emit AddToWhitelist(wallet_);
@@ -88,7 +86,7 @@ contract GlobalList is Initializable, OwnableUpgradeable {
     function removeFromBlacklist(address wallet_) external onlyOwner {
         require(
             blacklist[wallet_] == true,
-            'GlobalList: Address not blacklisted'
+            "GlobalList: Address not blacklisted"
         );
         blacklist[wallet_] = false;
         emit RemoveFromBlacklist(wallet_);

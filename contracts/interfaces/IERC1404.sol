@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.17;
 
+
 interface IERC1404 {
     /**
      * @dev See ERC-1404

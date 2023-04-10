@@ -4,8 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@matterlabs/hardhat-zksync-deploy": "^0.6.2",
-    "@matterlabs/hardhat-zksync-solc": "^0.3.14",
+    "@matterlabs/hardhat-zksync-deploy": "0.6.3",
+    "@matterlabs/hardhat-zksync-solc": "^0.3.16",
+    "@matterlabs/hardhat-zksync-verify": "^0.1.4",
+    "@matterlabs/signature-checker": "^1.1.1",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@openzeppelin/contracts": "^4.8.2",
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "dotenv": "^16.0.3",
