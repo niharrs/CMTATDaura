@@ -5,8 +5,8 @@ pragma solidity ^0.8.17;
 // required OZ imports here
 import "./interfaces/IRuleEngine.sol";
 import "./interfaces/IRule.sol";
-import "./interfaces/IGlobalList.sol";
 import "./Rule.sol";
+import "./GlobalList.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
@@ -14,7 +14,7 @@ contract RuleEngine is IRuleEngine, Context {
     IAccessControlUpgradeable public immutable cmtat;
     IRule[] private _rules;
 
-    constructor(IGlobalList globalList, IAccessControlUpgradeable cmtat_) {
+    constructor(GlobalList globalList, IAccessControlUpgradeable cmtat_) {
         _rules.push(new Rule(globalList, cmtat_));
         cmtat = cmtat_;
     }

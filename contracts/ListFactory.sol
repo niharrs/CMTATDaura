@@ -3,7 +3,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 
-import "./Beacon.sol";
+import "./Beacon/Beacon.sol";
 import "./GlobalList.sol";
 
 contract ListFactory {

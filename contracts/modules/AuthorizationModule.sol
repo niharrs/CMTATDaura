@@ -5,17 +5,80 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "../interfaces/IGlobalList.sol";
-import {SignatureChecker} from "@matterlabs/signature-checker/contracts/SignatureChecker.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
+import "../GlobalList.sol";
+
+library Signature {
+    /**
+     * @dev get keccak256 hash of the message
+     */
+    function getMessageHash(
+        string memory _message
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_message));
+    }
+
+    function getEthSignedMessageHash(
+        bytes32 _messageHash
+    ) internal pure returns (bytes32) {
+        /*
+        Signature is produced by signing a keccak256 hash with the following format:
+        "\x19Ethereum Signed Message\n" + len(msg) + msg
+        */
+        return
+            keccak256(
+                abi.encodePacked(
+                    "\x19Ethereum Signed Message:\n32",
+                    _messageHash
+                )
+            );
+    }
+
+    /**
+     * @dev Verify if signature was signed by _signer
+     */
+    function verify(
+        address _signer,
+        string memory _message,
+        bytes memory signature
+    ) internal pure returns (bool) {
+        bytes32 messageHash = getMessageHash(_message);
+        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
+
+        return recoverSigner(ethSignedMessageHash, signature) == _signer;
+    }
+
+    function recoverSigner(
+        bytes32 _ethSignedMessageHash,
+        bytes memory _signature
+    ) internal pure returns (address) {
+        (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
+
+        return ecrecover(_ethSignedMessageHash, v, r, s);
+    }
+
+    function splitSignature(
+        bytes memory sig
+    ) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
+        require(sig.length == 65, "invalid signature length");
+
+        assembly {
+            // first 32 bytes, after the length prefix
+            r := mload(add(sig, 32))
+            // second 32 bytes
+            s := mload(add(sig, 64))
+            // final byte (first byte of the next 32 bytes)
+            v := byte(0, mload(add(sig, 96)))
+        }
+
+        // implicitly return (r, s, v)
+    }
+}
 
 abstract contract AuthorizationModule is
     Initializable,
-    AccessControlUpgradeable,
-    EIP712Upgradeable
+    AccessControlUpgradeable
 {
     using EnumerableSet for EnumerableSet.AddressSet;
-    using SignatureChecker for address;
     struct SignatureData {
         /**
          * @dev address of the signer
@@ -33,30 +96,29 @@ abstract contract AuthorizationModule is
 
     bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
     address public _owner;
-    IGlobalList public globalList;
+    GlobalList public globalList;
     /**
      * @dev iterable set of addresses of the guardians
      */
     EnumerableSet.AddressSet internal guardians;
     /**
-     * @dev to prevent a signature from being used twice
+     * @dev mapping of used signatures to prevent a signature from being used twice
      */
-    mapping(address => uint256) public nonces;
+    mapping(bytes => bool) internal usedSignatures;
 
     function __Authorization_init(
         address owner_,
         address[] memory guardianAddresses,
-        IGlobalList globalList_
+        GlobalList globalList_
     ) internal onlyInitializing {
         __AccessControl_init();
-        __EIP712_init("daura", "1");
         __Authorization_init_unchained(owner_, guardianAddresses, globalList_);
     }
 
     function __Authorization_init_unchained(
         address owner_,
         address[] memory guardianAddresses,
-        IGlobalList globalList_
+        GlobalList globalList_
     ) internal onlyInitializing {
         require(
             guardianAddresses.length < 6,
@@ -150,26 +212,6 @@ abstract contract AuthorizationModule is
         } else {
             super._revokeRole(role, account);
         }
-    }
-
-    function verify(
-        address _signer,
-        string memory _message,
-        bytes memory signature
-    ) internal returns (bool) {
-        bytes32 digest = _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    keccak256(
-                        "SetOwner(address signer,string message,uint256 nonce)"
-                    ),
-                    _signer,
-                    keccak256(bytes(_message)),
-                    nonces[_signer]++
-                )
-            )
-        );
-        return _signer.isValidSignatureNow(digest, signature);
     }
 
     function isAddressValid(address account) internal view {

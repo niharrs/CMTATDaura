@@ -3,8 +3,8 @@
 pragma solidity ^0.8.17;
 
 import "./interfaces/IRule.sol";
-import "./interfaces/IGlobalList.sol";
 import "./LocalList.sol";
+import "./GlobalList.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
 contract Rule is IRule {
@@ -15,12 +15,12 @@ contract Rule is IRule {
 
     string public constant UNKNOWN_MESSAGE = "Unknown restriction code";
 
-    IGlobalList public immutable globalList;
+    GlobalList public immutable globalList;
     LocalList public immutable localList;
 
     mapping(uint8 => string) public transferRestrictionMessages;
 
-    constructor(IGlobalList globalList_, IAccessControlUpgradeable cmtat) {
+    constructor(GlobalList globalList_, IAccessControlUpgradeable cmtat) {
         transferRestrictionMessages[SUCCESS_CODE] = "SUCCESS";
         transferRestrictionMessages[
             NOT_WHITELISTED_CODE
@@ -55,7 +55,7 @@ contract Rule is IRule {
         uint256 _amount
     ) public view returns (uint8) {
         if (_to == address(0)) return SUCCESS_CODE;
-        IGlobalList _globalList = globalList;
+        GlobalList _globalList = globalList;
         LocalList _localList = localList;
         if (_globalList.isBlacklisted(_to) || _globalList.isBlacklisted(_from))
             return GLOBALLY_BLACKLISTED_CODE;

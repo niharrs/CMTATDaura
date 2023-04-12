@@ -4,7 +4,7 @@ import "@matterlabs/hardhat-zksync-verify";
 
 module.exports = {
   zksolc: {
-    version: "1.3.8",
+    version: "1.3.5",
     compilerSource: "binary",
     settings: {},
   },

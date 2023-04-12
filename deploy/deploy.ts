@@ -4,15 +4,14 @@ import { Deployer } from '@matterlabs/hardhat-zksync-deploy';
 import * as dotenv from 'dotenv';
 dotenv.config()
 
-const walletPrivateKey = process.env.PRIVATE_KEY;
+const walletPrivateKey = process.env.PRIVATE_KEY ?? "";
 
 const factoryAddress = '0x5454605539E81ecfD30085Eba7ebBe80cB66eEA8';
 
 const paymasterAddress = '0x231a2672996739351Bf25783b4883a1BAeAA5490';
 
-const OwnerAddress = '0x5770d1Df20bB2Fa72B18b2ff9C118B13591D512E';
-const forwarderAddress = '0x231a2672996739351Bf25783b4883a1BAeAA5490';
-const constractName = 'DLTHU';
+const ownerAddress = '0x368493E7Ec4ffbFe236FA6A75165a346680BB8c7';
+const contractName = 'DLTHU';
 const contractSymbol = 'FFDSFSD';
 const TOKEN_ID = 'Daura';
 const contractTerms =
@@ -36,7 +35,7 @@ export default async function(hre: HardhatRuntimeEnvironment) {
 
   // Initialize the wallet.
   const provider = new Provider('https://zksync2-testnet.zksync.dev');
-  const wallet = new Wallet(walletPrivateKey!, provider);
+  const wallet = new Wallet(walletPrivateKey, provider);
 
   const deployer = new Deployer(hre, wallet);
 //   const artifact = await deployer.loadArtifact('CMTAT');
@@ -59,7 +58,7 @@ export default async function(hre: HardhatRuntimeEnvironment) {
 //   );
 
 //   const contract = new Contract(cmtatFactory.address, artifactCMTATFactory.abi, wallet);
-  const contract = new Contract("0xf46Dd9F8eE47431ecD0c366b7F45B62E8Aa18884", artifactCMTATFactory.abi, wallet);
+  const contract = new Contract(factoryAddress, artifactCMTATFactory.abi, wallet);
   console.log(contract.address);
 
   console.log('start building new contract');
@@ -84,21 +83,21 @@ export default async function(hre: HardhatRuntimeEnvironment) {
 
   try {
     const txReceipt = await contract.buildCMTAT(
-        OwnerAddress,
-        forwarderAddress,
-        constractName,
-        contractSymbol,
-        TOKEN_ID,
-        contractTerms,
-        // contractTermsHash,
-        // isSecurityDLT,
-        // globalListAddress,
-        // dauraWalletAddress,
-        // useRuleEngine,
-        // guardianAddresses,
-        randomId,
-      );
-      await txReceipt.wait(1);
+      ownerAddress,
+      paymasterAddress,
+      contractName,
+      contractSymbol,
+      TOKEN_ID,
+      contractTerms,
+      contractTermsHash,
+      isSecurityDLT,
+      globalListAddress,
+      dauraWalletAddress,
+      useRuleEngine,
+      guardianAddresses,
+      randomId,
+    )
+    await txReceipt.wait(1);
   } catch(e) {
     console.log(e);
   }
