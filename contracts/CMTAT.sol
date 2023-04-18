@@ -13,10 +13,9 @@ import "./modules/PauseModule.sol";
 import "./modules/ValidationModule.sol";
 import "./modules/MetaTxModule.sol";
 import "./modules/SnapshotModule.sol";
-import "./GlobalList.sol";
 import "./RuleEngine.sol";
 import "./interfaces/IRuleEngine.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "./interfaces/IGlobalList.sol";
 
 contract CMTAT is
     Initializable,
@@ -30,8 +29,6 @@ contract CMTAT is
     MetaTxModule,
     SnapshotModule
 {
-    using EnumerableSet for EnumerableSet.AddressSet;
-
     enum REJECTED_CODE {
         TRANSFER_OK,
         TRANSFER_REJECTED_PAUSED
@@ -69,7 +66,7 @@ contract CMTAT is
         string memory terms,
         bytes32 termsHash_,
         bool isSecurityDLT_,
-        GlobalList globalList,
+        IGlobalList globalList,
         address dauraWallet,
         bool useRuleEngine_,
         address[] memory guardianAddresses
@@ -103,7 +100,7 @@ contract CMTAT is
         string memory terms,
         bytes32 termsHash_,
         bool isSecurityDLT_,
-        GlobalList globalList,
+        IGlobalList globalList,
         address dauraWallet,
         bool useRuleEngine_,
         address[] memory guardianAddresses
@@ -116,6 +113,7 @@ contract CMTAT is
         __Snapshot_init_unchained();
         __CMTAT_init_unchained(owner, dauraWallet);
         __Authorization_init_unchained(owner, guardianAddresses, globalList);
+        __EIP712_init_unchained("daura", "1");
 
         termsHash = termsHash_;
         isSecurityDLT = isSecurityDLT_;
@@ -439,36 +437,25 @@ contract CMTAT is
             "CMTAT: Signer2 doesn't have GUARDIAN_ROLE"
         );
         require(
-            !usedSignatures[signatureData1.signature],
-            "CMTAT: Signature of Signer1 already used"
-        );
-        require(
-            !usedSignatures[signatureData2.signature],
-            "CMTAT: Signature of Signer2 already used"
-        );
-        require(
-            Signature.verify(
+            verify(
                 signatureData1.signer,
                 signatureData1.message,
                 signatureData1.signature
             ),
-            "CMTAT: Signature verification failed"
+            "CMTAT: Signature1 verification failed"
         );
         require(
-            Signature.verify(
+            verify(
                 signatureData2.signer,
                 signatureData2.message,
                 signatureData2.signature
             ),
-            "CMTAT: Signature verification failed"
+            "CMTAT: Signature2 verification failed"
         );
         _revokeAllRoles(_owner);
         _grantAllRoles(newOwner);
 
         _owner = newOwner;
-
-        usedSignatures[signatureData1.signature] = true;
-        usedSignatures[signatureData2.signature] = true;
     }
 
     /// @custom:oz-upgrades-unsafe-allow selfdestruct
